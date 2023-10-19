@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form id="chat-input">
+        <input type="text" id="message">
+        <button type="submit">Submit</button>
+    </form>
+    <div id="chat"></div>
+    <script>
+        const form = document.getElementById("chat-input");
+        const chatlog = document.getElementById("chat");
+
+        form.addEventListener("submit",async(event) => {
+            event.preventDefault();
+            const message = form.elements.message.value;
+
+            const response = await fetch("/display",{
+                method: "POST",
+                headers : {
+                    "Content-Type" : "application/json",
+                },
+                body : JSON.stringify({messages: message})
+            })
+            const decoder = new TextDecoder();
+            const reader = response.body.getReader();
+            let chunks = "";
+
+            while(true){
+                const {done, value} = await reader.read();
+                if(done) break;
+                chunks+=decoder.decode(value);
+                chatlog.innerHTML = chunks;
+            }
+        })
+    </script>
+</body>
+</html>
